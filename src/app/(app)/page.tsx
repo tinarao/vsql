@@ -81,7 +81,7 @@ export default function Home() {
                     />
                 )}
             </aside>
-            <main className="col-span-4">
+            <main className="col-span-3">
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}

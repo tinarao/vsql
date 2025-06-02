@@ -1,68 +1,27 @@
-import { Table, SQLType, SQL_TYPES } from '@/lib/types/sql';
+import { Table } from '@/lib/types/sql';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "./ui/select";
 import { memo, useCallback } from 'react';
 import { createColumn } from '@/lib/sql/builders/table';
+import {
+    Table as UITable,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "./ui/table";
+import { PenSquareIcon } from 'lucide-react';
+import { ColumnEditorModal } from './ColumnEditorModal';
 
 interface TableDetailsProps {
     table: Table;
     onUpdate: (table: Table) => void;
 }
 
-const ColumnEditor = memo(({
-    column,
-    index,
-    onUpdate
-}: {
-    column: Table['columns'][0];
-    index: number;
-    onUpdate: (index: number, column: Table['columns'][0]) => void;
-}) => {
-    const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        onUpdate(index, { ...column, name: e.target.value });
-    }, [column, index, onUpdate]);
-
-    const handleTypeChange = useCallback((value: SQLType) => {
-        onUpdate(index, { ...column, sqlType: value });
-    }, [column, index, onUpdate]);
-
-    return (
-        <div className="flex gap-2">
-            <Input
-                value={column.name}
-                onChange={handleNameChange}
-            />
-            <Select
-                value={column.sqlType}
-                onValueChange={handleTypeChange}
-            >
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Выберите тип" />
-                </SelectTrigger>
-                <SelectContent>
-                    {SQL_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-        </div>
-    );
-});
-
-ColumnEditor.displayName = 'ColumnEditor';
 
 export const TableDetails = memo(function TableDetails({ table, onUpdate }: TableDetailsProps) {
-
     const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         onUpdate({ ...table, name: e.target.value });
     }, [table, onUpdate]);
@@ -101,23 +60,46 @@ export const TableDetails = memo(function TableDetails({ table, onUpdate }: Tabl
             </div>
 
             <div>
-                <h3 className="font-medium mb-2">Колонки</h3>
-                <div className="space-y-2">
-                    {table.columns && table.columns.map((column, index) => (
-                        <ColumnEditor
-                            key={column.uuid}
-                            column={column}
-                            index={index}
-                            onUpdate={handleColumnUpdate}
-                        />
-                    ))}
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-medium">Колонки</h3>
+                    <Button onClick={handleAddColumn}>
+                        Добавить колонку
+                    </Button>
                 </div>
-                <Button
-                    className="mt-2"
-                    onClick={handleAddColumn}
-                >
-                    Добавить колонку
-                </Button>
+                
+                <UITable>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Название</TableHead>
+                            <TableHead>Тип данных</TableHead>
+                            <TableHead>Действия</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {table.columns.map((column, index) => (
+                            <TableRow 
+                                key={column.uuid}
+                                className="cursor-pointer hover:bg-muted/50"
+                            >
+                                <TableCell>{column.name}</TableCell>
+                                <TableCell className={column.isPK ? "text-primary" : ""}>{column.sqlType}</TableCell>
+                                <TableCell>
+                                    <ColumnEditorModal column={column} index={index} onUpdate={handleColumnUpdate}>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <PenSquareIcon  />
+                                    </Button>
+                                    </ColumnEditorModal>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </UITable>
             </div>
         </div>
     );

@@ -5,7 +5,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
     return (
         <div className="h-screen flex flex-col">
             <Header />
-            <div className="grid grid-cols-5 flex-1">
+            <div className="grid grid-cols-4 flex-1">
                 {children}
             </div>
         </div>
