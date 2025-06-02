@@ -2,12 +2,12 @@ export type Table = {
     uuid: string
     name: string
     desc?: string
-    rows: Row[]
+    columns: Column[]
     createdAt: string
     lastUpdatedAt: string
 }
 
-export type Row = {
+export type Column = {
     uuid: string
     name: string
     sqlType: SQLType
