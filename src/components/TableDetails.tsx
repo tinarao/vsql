@@ -1,4 +1,4 @@
-import { Table, SQLType } from '@/lib/types/sql';
+import { Table, SQLType, SQL_TYPES } from '@/lib/types/sql';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -10,52 +10,20 @@ import {
     SelectValue,
 } from "./ui/select";
 import { memo, useCallback } from 'react';
-
-const SQL_TYPES: { label: string; value: SQLType }[] = [
-    // Числовые типы
-    { label: 'SMALLINT', value: 'SMALLINT' },
-    { label: 'INTEGER', value: 'INTEGER' },
-    { label: 'BIGINT', value: 'BIGINT' },
-    { label: 'DECIMAL', value: 'DECIMAL' },
-    { label: 'NUMERIC', value: 'NUMERIC' },
-    { label: 'REAL', value: 'REAL' },
-    { label: 'DOUBLE PRECISION', value: 'DOUBLE PRECISION' },
-    { label: 'SERIAL', value: 'SERIAL' },
-    { label: 'BIGSERIAL', value: 'BIGSERIAL' },
-    
-    // Символьные типы
-    { label: 'VARCHAR', value: 'VARCHAR' },
-    { label: 'CHAR', value: 'CHAR' },
-    { label: 'TEXT', value: 'TEXT' },
-    
-    // Дата и время
-    { label: 'TIMESTAMP', value: 'TIMESTAMP' },
-    { label: 'DATE', value: 'DATE' },
-    { label: 'TIME', value: 'TIME' },
-    
-    // Булев тип
-    { label: 'BOOLEAN', value: 'BOOLEAN' },
-    
-    // JSON типы
-    { label: 'JSON', value: 'JSON' },
-    { label: 'JSONB', value: 'JSONB' },
-    
-    // UUID
-    { label: 'UUID', value: 'UUID' },
-];
+import { createColumn } from '@/lib/sql/builders/table';
 
 interface TableDetailsProps {
-    table: Table | null;
+    table: Table;
     onUpdate: (table: Table) => void;
 }
 
-const ColumnEditor = memo(({ 
-    column, 
-    index, 
-    onUpdate 
-}: { 
-    column: Table['columns'][0]; 
-    index: number; 
+const ColumnEditor = memo(({
+    column,
+    index,
+    onUpdate
+}: {
+    column: Table['columns'][0];
+    index: number;
     onUpdate: (index: number, column: Table['columns'][0]) => void;
 }) => {
     const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,13 +62,6 @@ const ColumnEditor = memo(({
 ColumnEditor.displayName = 'ColumnEditor';
 
 export const TableDetails = memo(function TableDetails({ table, onUpdate }: TableDetailsProps) {
-    if (!table) {
-        return (
-            <div className="p-4 text-muted-foreground">
-                Выберите таблицу для просмотра деталей
-            </div>
-        );
-    }
 
     const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         onUpdate({ ...table, name: e.target.value });
@@ -113,19 +74,20 @@ export const TableDetails = memo(function TableDetails({ table, onUpdate }: Tabl
     }, [table, onUpdate]);
 
     const handleAddColumn = useCallback(() => {
+        const newCol = createColumn({ name: "field", type: "TEXT" })
         onUpdate({
             ...table,
-            columns: [...table.columns, { 
-                uuid: crypto.randomUUID(),
-                name: '', 
-                sqlType: 'VARCHAR',
-                isUnique: false,
-                isNullable: true,
-                isPK: false,
-                isFK: false
-            }]
+            columns: [...table.columns, newCol]
         });
     }, [table, onUpdate]);
+
+    if (!table) {
+        return (
+            <div className="p-4 text-muted-foreground">
+                Выберите таблицу для просмотра деталей
+            </div>
+        );
+    }
 
     return (
         <div className="p-4 space-y-4">
@@ -137,7 +99,7 @@ export const TableDetails = memo(function TableDetails({ table, onUpdate }: Tabl
                     onChange={handleNameChange}
                 />
             </div>
-            
+
             <div>
                 <h3 className="font-medium mb-2">Колонки</h3>
                 <div className="space-y-2">

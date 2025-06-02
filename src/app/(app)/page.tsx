@@ -2,15 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import { createTable } from "@/lib/sql/builders/table";
-import { $tables, appendTable, loadFromLocalStorage, saveToLocalStorage, updateTable } from "@/lib/store";
+import { $tables, appendTable, loadFromLocalStorage, updateTable } from "@/lib/store";
 import { useUnit } from "effector-react";
-import { Save } from "lucide-react";
-import ReactFlow, { Node, useNodesState, useEdgesState, Controls, NodeChange, EdgeChange } from 'reactflow';
+import ReactFlow, { Node, useNodesState, useEdgesState, Controls, NodeChange, EdgeChange, Background, BackgroundVariant } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { TableNode } from '@/components/TableNode';
 import { TableDetails } from '@/components/TableDetails';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Table } from '@/lib/types/sql';
+import { PlusIcon } from "lucide-react";
 
 const nodeTypes = {
     table: TableNode,
@@ -20,7 +20,7 @@ export default function Home() {
     const tables = useUnit($tables);
     const [selectedTable, setSelectedTable] = useState<string | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [edges, _setEdges, onEdgesChange] = useEdgesState([]);
 
     useEffect(() => {
         loadFromLocalStorage()
@@ -52,10 +52,6 @@ export default function Home() {
         updateTable(updatedTable);
     }, []);
 
-    const handleSave = useCallback(() => {
-        saveToLocalStorage(tables);
-    }, [tables]);
-
     const handleNodesChange = useCallback((changes: NodeChange[]) => {
         onNodesChange(changes);
     }, [onNodesChange]);
@@ -64,51 +60,43 @@ export default function Home() {
         onEdgesChange(changes);
     }, [onEdgesChange]);
 
-    const selectedTableData = useMemo(() => 
+    const selectedTableData = useMemo(() =>
         tables.find((t: Table) => t.uuid === selectedTable) || null
-    , [tables, selectedTable]);
+        , [tables, selectedTable]);
 
     return (
-        <div className="h-screen flex flex-col">
-            <header className="flex items-center justify-between px-8 py-4 border-b text-xl">
-                <p>
-                    <span className="text-primary">v</span>sql
-                </p>
-                <div>
-                    <Button onClick={handleSave}>
-                        <Save /> Сохранить
+        <>
+            <aside className="border-r h-full">
+                <div className="p-4">
+                    <Button size="lg" onClick={handleCreateNewTable}>
+                        <PlusIcon />
+                        Создать таблицу
                     </Button>
                 </div>
-            </header>
-            <div className="grid grid-cols-5 flex-1">
-                <aside className="border-r h-full">
-                    <div className="p-4 border-b">
-                        <Button onClick={handleCreateNewTable}>
-                            Создать таблицу
-                        </Button>
-                    </div>
+                {selectedTableData && (
                     <TableDetails
                         table={selectedTableData}
                         onUpdate={handleTableUpdate}
                     />
-                </aside>
-                <main className="col-span-4">
-                    <ReactFlow
-                        nodes={nodes}
-                        edges={edges}
-                        onNodesChange={handleNodesChange}
-                        onEdgesChange={handleEdgesChange}
-                        onNodeClick={handleNodeClick}
-                        nodeTypes={nodeTypes}
-                        fitView
-                        minZoom={0.1}
-                        maxZoom={2}
-                        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-                    >
-                        <Controls />
-                    </ReactFlow>
-                </main>
-            </div>
-        </div>
+                )}
+            </aside>
+            <main className="col-span-4">
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={handleNodesChange}
+                    onEdgesChange={handleEdgesChange}
+                    onNodeClick={handleNodeClick}
+                    nodeTypes={nodeTypes}
+                    fitView
+                    minZoom={0.1}
+                    maxZoom={2}
+                    defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+                >
+                    <Background variant={BackgroundVariant.Dots} />
+                    <Controls />
+                </ReactFlow>
+            </main>
+        </>
     );
 }

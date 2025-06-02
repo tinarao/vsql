@@ -9,21 +9,21 @@ export const $tables = createStore<Table[]>([])
 
 $tables
     .on(appendTable, (tables, table) => ([
-    ...tables,
-    table
-]))
-    .on(updateTable, (tables, updatedTable) => 
-        tables.map(table => 
+        ...tables,
+        table
+    ]))
+    .on(updateTable, (tables, updatedTable) =>
+        tables.map(table =>
             table.uuid === updatedTable.uuid ? updatedTable : table
         )
     )
-    .on(setTables, (tables, savedTables) => 
+    .on(setTables, (tables, savedTables) =>
         tables = savedTables
     )
 
 
-export const saveToLocalStorage = (data: Table[]) => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data))
+export const saveToLocalStorage = () => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify($tables.getState()))
 }
 
 export const loadFromLocalStorage = () => {
