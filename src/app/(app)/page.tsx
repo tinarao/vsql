@@ -20,7 +20,8 @@ export default function Home() {
     const tables = useUnit($tables);
     const [selectedTable, setSelectedTable] = useState<string | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, _setEdges, onEdgesChange] = useEdgesState([]);
+
+    const [edges, _, onEdgesChange] = useEdgesState([]);
 
     useEffect(() => {
         loadFromLocalStorage()
