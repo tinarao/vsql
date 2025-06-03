@@ -11,7 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from "./ui/table";
-import { PenSquareIcon } from 'lucide-react';
+import { PenSquareIcon, PlusIcon } from 'lucide-react';
 import { ColumnEditorModal } from './ColumnEditorModal';
 import { createColumn } from '@/lib/sql/fabrics/table';
 
@@ -62,8 +62,8 @@ export const TableDetails = memo(function TableDetails({ table, onUpdate }: Tabl
             <div>
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-medium">Колонки</h3>
-                    <Button onClick={handleAddColumn}>
-                        Добавить колонку
+                    <Button className="size-8" variant="outline" onClick={handleAddColumn}>
+                        <PlusIcon />
                     </Button>
                 </div>
                 
