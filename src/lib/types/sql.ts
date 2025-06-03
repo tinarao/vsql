@@ -1,3 +1,10 @@
+export type Project = {
+    uuid: string
+    name: string
+    tables: Table[]
+    createdAt: string
+}
+
 export type Table = {
     uuid: string
     name: string

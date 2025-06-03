@@ -3,7 +3,6 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { memo, useCallback } from 'react';
-import { createColumn } from '@/lib/sql/builders/table';
 import {
     Table as UITable,
     TableBody,
@@ -14,6 +13,7 @@ import {
 } from "./ui/table";
 import { PenSquareIcon } from 'lucide-react';
 import { ColumnEditorModal } from './ColumnEditorModal';
+import { createColumn } from '@/lib/sql/fabrics/table';
 
 interface TableDetailsProps {
     table: Table;
