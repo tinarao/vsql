@@ -12,7 +12,6 @@ export const $currentProject = $projects.map((projects) => {
     return projects.find((p) => p.uuid === currentProjectId) || null;
 });
 
-export const getCurrentProjectIndex = createEvent();
 export const setProjects = createEvent<Project[]>();
 export const appendProject = createEvent<Project>();
 export const appendTable = createEvent<Table>();

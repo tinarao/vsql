@@ -9,9 +9,17 @@ import {
 import { useUnit } from "effector-react";
 import { ArrowRight, PlusIcon } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function IndexPage() {
+    const [isMounted, setIsMounted] = useState(false)
     const projects = useUnit($projects);
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
+    if (!isMounted) return null;
 
     return (
         <div className="px-8 py-4">
