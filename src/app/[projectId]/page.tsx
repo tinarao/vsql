@@ -1,7 +1,7 @@
 "use client";
 
 import { useUnit } from "effector-react";
-import { Node, useNodesState, useEdgesState } from "reactflow";
+import { Node, useNodesState, useEdgesState, Edge, MarkerType } from "reactflow";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Table } from "@/lib/types/sql";
 import {
@@ -22,7 +22,7 @@ export default function ProjectPageClient() {
     const currentProject = useUnit($currentProject);
     const [selectedTable, setSelectedTable] = useState<string | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, _, onEdgesChange] = useEdgesState([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
     useEffect(() => {
         if (projectId) {
@@ -48,7 +48,22 @@ export default function ProjectPageClient() {
             },
         }));
         setNodes(newNodes);
-    }, [tables, selectedTable, setNodes]);
+
+        const newEdges: Edge[] = currentProject?.relations.map(relation => ({
+            id: relation.uuid,
+            source: relation.sourceTableId,
+            target: relation.targetTableId,
+            sourceHandle: relation.sourceColumnId,
+            targetHandle: relation.targetColumnId,
+            type: 'smoothstep',
+            animated: true,
+            style: { stroke: '#888' },
+            markerEnd: {
+                type: MarkerType.ArrowClosed,
+            },
+        })) || [];
+        setEdges(newEdges);
+    }, [tables, selectedTable, setNodes, currentProject?.relations, setEdges]);
 
     const handleTableAction = useCallback((action: 'create' | 'update' | 'select', table?: Table) => {
         switch (action) {

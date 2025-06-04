@@ -1,7 +1,8 @@
 import { createEvent, createStore } from "effector";
-import { Project, Table } from "../types/sql";
+import { Project, Table, Relation } from "../types/sql";
 import { $currentProjectId } from "./currentProjectId";
 import { persist } from "effector-storage/local"
+import { nanoid } from "nanoid";
 
 const LOCAL_STORAGE_KEY = "projects";
 
@@ -18,6 +19,8 @@ export const appendTable = createEvent<Table>();
 export const removeTable = createEvent<string>(); // string param is uuid
 export const updateTable = createEvent<Table>();
 export const setTables = createEvent<Table[]>();
+export const addRelation = createEvent<Omit<Relation, 'uuid'>>();
+export const removeRelation = createEvent<string>();
 
 $projects
     .on(setProjects, (_projects, newProjects) => [...newProjects])
@@ -60,6 +63,37 @@ $projects
             project.uuid === currentProjectId
                 ? { ...project, tables: savedTables }
                 : project,
+        );
+    })
+    .on(addRelation, (projects, relationData) => {
+        const currentProjectId = $currentProjectId.getState();
+        if (!currentProjectId) return projects;
+
+        const relation: Relation = {
+            ...relationData,
+            uuid: nanoid(128)
+        };
+
+        return projects.map((project) =>
+            project.uuid === currentProjectId
+                ? {
+                    ...project,
+                    relations: [...project.relations, relation]
+                }
+                : project
+        );
+    })
+    .on(removeRelation, (projects, relationId) => {
+        const currentProjectId = $currentProjectId.getState();
+        if (!currentProjectId) return projects;
+
+        return projects.map((project) =>
+            project.uuid === currentProjectId
+                ? {
+                    ...project,
+                    relations: project.relations.filter(r => r.uuid !== relationId)
+                }
+                : project
         );
     });
 

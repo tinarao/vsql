@@ -8,9 +8,10 @@ import { Table } from "@/lib/types/sql";
 import { cn } from "@/lib/utils";
 import { TableIcon } from "lucide-react";
 import { Badge } from "./ui/badge";
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { removeTable } from "@/lib/store/projects";
 import { toast } from "sonner";
+import { Handle, Position } from "reactflow";
 
 interface TableNodeProps {
     data: {
@@ -48,9 +49,25 @@ function TableNodeComponent({ data }: TableNodeProps) {
                             table.columns.map((c) => (
                                 <div
                                     key={c.uuid}
-                                    className="flex items-center justify-between gap-x-4"
+                                    className="flex items-center justify-between gap-x-4 group relative"
                                 >
-                                    <p>{c.name}</p>
+                                    <Handle
+                                        type="source"
+                                        position={Position.Right}
+                                        id={c.uuid}
+                                        className="!w-3 !h-3 !bg-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                    />
+                                    <Handle
+                                        type="target"
+                                        position={Position.Left}
+                                        id={c.uuid}
+                                        className="!w-3 !h-3 !bg-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                    />
+                                    <p 
+                                        className="cursor-pointer hover:text-primary"
+                                    >
+                                        {c.name}
+                                    </p>
                                     <div className="space-x-1">
                                         {c.isPK && <Badge className="bg-purple-500">PK</Badge>}
                                         {c.isUnique && <Badge className="bg-green-500">UNIQUE</Badge>}

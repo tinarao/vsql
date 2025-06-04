@@ -6,9 +6,14 @@ import ReactFlow, {
     EdgeChange,
     Background,
     BackgroundVariant,
+    Connection,
+    addEdge,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { TableNode } from "@/components/TableNode";
+import { useUnit } from "effector-react";
+import { $currentProject, addRelation } from "@/lib/store/projects";
+import { useCallback, useEffect } from "react";
 
 const nodeTypes = {
     table: TableNode,
@@ -29,6 +34,21 @@ export function ProjectFlow({
     onEdgesChange,
     onNodeClick,
 }: ProjectFlowProps) {
+    const onConnect = useCallback(
+        (connection: Connection) => {
+            if (!connection.source || !connection.target || !connection.sourceHandle || !connection.targetHandle) return;
+
+            addRelation({
+                sourceTableId: connection.source,
+                sourceColumnId: connection.sourceHandle,
+                targetTableId: connection.target,
+                targetColumnId: connection.targetHandle,
+                type: 'ONE_TO_MANY',
+            });
+        },
+        []
+    );
+
     return (
         <ReactFlow
             nodes={nodes}
@@ -36,6 +56,7 @@ export function ProjectFlow({
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onNodeClick={onNodeClick}
+            onConnect={onConnect}
             nodeTypes={nodeTypes}
             fitView
             minZoom={0.1}

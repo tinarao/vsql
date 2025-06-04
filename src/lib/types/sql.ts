@@ -1,7 +1,17 @@
+export type Relation = {
+    uuid: string;
+    sourceTableId: string;
+    sourceColumnId: string;
+    targetTableId: string;
+    targetColumnId: string;
+    type: 'ONE_TO_ONE' | 'ONE_TO_MANY' | 'MANY_TO_MANY';
+}
+
 export type Project = {
     uuid: string
     name: string
     tables: Table[]
+    relations: Relation[]
     createdAt: string
 }
 
