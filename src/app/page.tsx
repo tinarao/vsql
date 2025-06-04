@@ -29,7 +29,7 @@ export default function IndexPage() {
                     </Button>
                 </CreateProjectModal>
             </div>
-            <div className="grid grid-cols-6 gap-4 py-4">
+            <div className="grid grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 py-4">
                 {projects.map((project) => (
                     <Card key={project.uuid}>
                         <CardHeader>

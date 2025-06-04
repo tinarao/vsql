@@ -13,7 +13,7 @@ export function Header() {
                 </p>
                 <CurrentProjectName />
             </div>
-            <div className="space-x-2">
+            <div className="flex items-center gap-x-2">
                 <Button asChild variant="outline">
                     <Link href="/">
                         <List />

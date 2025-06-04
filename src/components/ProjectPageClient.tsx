@@ -5,23 +5,22 @@ import { Node, useNodesState, useEdgesState } from "reactflow";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Table } from "@/lib/types/sql";
 import {
-    $projects,
+    $currentProject,
     appendTable,
     updateTable,
-    setCurrentProjectId,
     loadFromLocalStorage,
 } from "@/lib/store/projects";
 import { createTable } from "@/lib/sql/fabrics/table";
 import { ProjectSidebar } from "@/components/ProjectSidebar";
 import { ProjectFlow } from "@/components/ProjectFlow";
+import { setCurrentProjectId } from "@/lib/store/currentProjectId";
 
 interface ProjectPageClientProps {
     projectId: string;
 }
 
 export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
-    const projects = useUnit($projects);
-
+    const currentProject = useUnit($currentProject);
     const [selectedTable, setSelectedTable] = useState<string | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, _, onEdgesChange] = useEdgesState([]);
@@ -35,11 +34,6 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             setCurrentProjectId(projectId);
         }
     }, [projectId]);
-
-    const currentProject = useMemo(
-        () => projects.find((p) => p.uuid === projectId),
-        [projects, projectId],
-    );
 
     const tables = useMemo(() => currentProject?.tables || [], [currentProject]);
 
@@ -56,37 +50,39 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
         setNodes(newNodes);
     }, [tables, selectedTable, setNodes]);
 
-    const handleCreateNewTable = useCallback(() => {
-        const t = createTable({ name: "Новая таблица" });
-        appendTable(t);
+    const handleTableAction = useCallback((action: 'create' | 'update' | 'select', table?: Table) => {
+        switch (action) {
+            case 'create':
+                const newTable = createTable({ name: "Новая таблица" });
+                appendTable(newTable);
+                break;
+            case 'update':
+                if (table) updateTable(table);
+                break;
+            case 'select':
+                if (table) setSelectedTable(table.uuid);
+                break;
+        }
     }, []);
 
     const handleNodeClick = useCallback(
         (_event: React.MouseEvent, node: Node) => {
-            setSelectedTable(node.id);
+            handleTableAction('select', { uuid: node.id } as Table);
         },
-        [],
+        [handleTableAction],
     );
-
-    const handleTableUpdate = useCallback((updatedTable: Table) => {
-        updateTable(updatedTable);
-    }, []);
 
     const selectedTableData = useMemo(
         () => tables.find((t: Table) => t.uuid === selectedTable) || null,
         [tables, selectedTable],
     );
 
-    if (!currentProject) {
-        return null;
-    }
-
     return (
         <>
             <ProjectSidebar
-                onCreateTable={handleCreateNewTable}
+                onCreateTable={() => handleTableAction('create')}
                 selectedTable={selectedTableData}
-                onTableUpdate={handleTableUpdate}
+                onTableUpdate={(table) => handleTableAction('update', table)}
             />
             <main className="col-span-3">
                 <ProjectFlow
@@ -99,4 +95,4 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             </main>
         </>
     );
-} 
+}

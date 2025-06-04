@@ -1,21 +1,15 @@
 "use client"
 
-import { $currentProjectId, $projects } from "@/lib/store/projects"
+import { $currentProject } from "@/lib/store/projects";
 import { useUnit } from "effector-react"
-import { useMemo } from "react";
+import Link from "next/link";
 
 export function CurrentProjectName() {
-    const currentProjectId = useUnit($currentProjectId)
-    const projects = useUnit($projects)
-
-    const currentProject = useMemo(
-        () => projects.find((p) => p.uuid === currentProjectId),
-        [projects, currentProjectId],
-    );
+    const currentProject = useUnit($currentProject);
 
     return (
-        <p>
-            {currentProject?.name}
-        </p>
-    )
+        <Link href={currentProject?.uuid || "/"}>
+            {currentProject?.name || 'Проект не выбран'}
+        </Link>
+    );
 }

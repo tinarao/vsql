@@ -1,79 +1,102 @@
 import { createEvent, createStore } from "effector";
 import { Project, Table } from "../types/sql";
+import { $currentProjectId } from "./currentProjectId";
 
 const LOCAL_STORAGE_KEY = "projects";
 
 export const $projects = createStore<Project[]>([]);
-export const $currentProjectId = createStore<string | null>(null);
 
-export const appendProject = createEvent<Project>();
-export const setCurrentProjectId = createEvent<string>();
+export const $currentProject = $projects.map((projects) => {
+    const currentProjectId = $currentProjectId.getState();
+    return projects.find((p) => p.uuid === currentProjectId) || null;
+});
+
 export const getCurrentProjectIndex = createEvent();
 export const setProjects = createEvent<Project[]>();
-
-export const setTables = createEvent<Table[]>();
+export const appendProject = createEvent<Project>();
 export const appendTable = createEvent<Table>();
 export const updateTable = createEvent<Table>();
+export const setTables = createEvent<Table[]>();
 
 $projects
-  .on(setProjects, (_projects, newProjects) => [...newProjects])
-  .on(appendProject, (projects, project) => [...projects, project])
-  .on(appendTable, (projects, table) => {
-    const currentProjectId = $currentProjectId.getState();
-    if (!currentProjectId) return projects;
+    .on(setProjects, (_projects, newProjects) => [...newProjects])
+    .on(appendProject, (projects, project) => [...projects, project])
+    .on(appendTable, (projects, table) => {
+        const currentProjectId = $currentProjectId.getState();
+        if (!currentProjectId) return projects;
 
-    return projects.map((project) =>
-      project.uuid === currentProjectId
-        ? { ...project, tables: [...project.tables, table] }
-        : project,
-    );
-  })
-  .on(updateTable, (projects, updatedTable) => {
-    const currentProjectId = $currentProjectId.getState();
-    if (!currentProjectId) return projects;
+        return projects.map((project) =>
+            project.uuid === currentProjectId
+                ? { ...project, tables: [...project.tables, table] }
+                : project,
+        );
+    })
+    .on(updateTable, (projects, updatedTable) => {
+        const currentProjectId = $currentProjectId.getState();
+        if (!currentProjectId) return projects;
 
-    return projects.map((project) =>
-      project.uuid === currentProjectId
-        ? {
-            ...project,
-            tables: project.tables.map((table) =>
-              table.uuid === updatedTable.uuid ? updatedTable : table,
-            ),
-          }
-        : project,
-    );
-  })
-  .on(setTables, (projects, savedTables) => {
-    const currentProjectId = $currentProjectId.getState();
-    if (!currentProjectId) return projects;
+        return projects.map((project) =>
+            project.uuid === currentProjectId
+                ? {
+                    ...project,
+                    tables: project.tables.map((table) =>
+                        table.uuid === updatedTable.uuid ? updatedTable : table,
+                    ),
+                }
+                : project,
+        );
+    })
+    .on(setTables, (projects, savedTables) => {
+        const currentProjectId = $currentProjectId.getState();
+        if (!currentProjectId) return projects;
 
-    return projects.map((project) =>
-      project.uuid === currentProjectId
-        ? { ...project, tables: savedTables }
-        : project,
-    );
-  });
-
-$currentProjectId.on(setCurrentProjectId, (_prev, newId) => newId);
+        return projects.map((project) =>
+            project.uuid === currentProjectId
+                ? { ...project, tables: savedTables }
+                : project,
+        );
+    });
 
 export const loadFromLocalStorage = () => {
-  const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (!raw) {
-    console.warn("No saved data found");
-    setProjects([]);
-    return;
-  }
+    if (typeof window === 'undefined') return;
+    
+    try {
+        const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (!raw) {
+            console.warn("No saved data found");
+            setProjects([]);
+            return;
+        }
 
-  try {
-    console.time("Loading saved data");
-    const data = JSON.parse(raw) as Project[];
-    setProjects(data);
-    console.timeEnd("Loading saved data");
-  } catch {
-    console.warn("Invalid saved data found. Resetting.");
-    setProjects([]);
-  }
+        console.time("Loading saved data");
+        const data = JSON.parse(raw) as Project[];
+        
+        if (!Array.isArray(data)) {
+            throw new Error("Invalid data structure: expected array");
+        }
+        
+        const validData = data.filter(project => {
+            if (!project || typeof project !== 'object') return false;
+            if (!project.uuid || typeof project.uuid !== 'string') return false;
+            if (!Array.isArray(project.tables)) return false;
+            return true;
+        });
+
+        setProjects(validData);
+        console.timeEnd("Loading saved data");
+    } catch (error) {
+        console.error("Error loading data:", error);
+        setProjects([]);
+    }
 };
-export const saveToLocalStorage = () => {
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify($projects.getState()));
+
+export const saveToLocalStorage = async () => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+        const data = $projects.getState();
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+        console.error("Error saving data:", error);
+    }
 };
