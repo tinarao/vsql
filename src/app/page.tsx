@@ -5,19 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     $projects,
-    loadFromLocalStorage,
 } from "@/lib/store/projects";
 import { useUnit } from "effector-react";
 import { ArrowRight, PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
 
 export default function IndexPage() {
     const projects = useUnit($projects);
-
-    useEffect(() => {
-        loadFromLocalStorage();
-    }, []);
 
     return (
         <div className="px-8 py-4">

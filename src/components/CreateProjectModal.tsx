@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { LoaderCircle, Plus } from "lucide-react";
-import { $projects, appendProject, saveToLocalStorage } from "@/lib/store/projects";
+import { $projects, appendProject } from "@/lib/store/projects";
 import { createProject } from "@/lib/sql/fabrics/projects";
 import { useState } from "react";
 import { Label } from "./ui/label";
@@ -27,7 +27,6 @@ export function CreateProjectModal({ children }: React.PropsWithChildren) {
         setIsCreating(true)
         const project = createProject(newProjectName || "Проект " + $projects.getState().length);
         appendProject(project);
-        saveToLocalStorage()
 
         setIsCreating(false)
         router.replace(project.uuid)

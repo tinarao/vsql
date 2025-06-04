@@ -1,7 +1,7 @@
 "use client";
 
 import { exportSqlMigrationCode } from "@/lib/sql/export";
-import { $currentProject, loadFromLocalStorage } from "@/lib/store/projects";
+import { $currentProject } from "@/lib/store/projects";
 import { useUnit } from "effector-react";
 import { CopyIcon, LoaderCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -14,10 +14,6 @@ import { toast } from "sonner";
 export function ExportCode() {
     const [isCopying, setIsCopying] = useState(false)
     const currentProject = useUnit($currentProject);
-
-    useEffect(() => {
-        loadFromLocalStorage();
-    }, []);
 
     const sqlMigrationCode = useMemo(() => {
         return currentProject ? exportSqlMigrationCode(currentProject) : "";

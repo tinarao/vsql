@@ -1,12 +1,13 @@
 "use client"
 
 import { SQLType, Column, SQL_TYPES, Table } from "@/lib/types/sql";
-import React, { ReactNode, useCallback } from "react";
+import React, { ReactNode, useCallback, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Switch } from "./ui/switch";
+import { useDebouncedCallback } from "use-debounce";
 
 interface ColumnEditorProps {
     children: ReactNode
@@ -17,9 +18,17 @@ interface ColumnEditorProps {
 }
 
 export function ColumnEditorModal({ children, column, index, onUpdate, onClose }: ColumnEditorProps) {
-    const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        onUpdate(index, { ...column, name: e.target.value });
-    }, [column, index, onUpdate]);
+    const [inputValue, setInputValue] = useState(column.name);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setInputValue(newValue);
+        handleNameChange(newValue);
+    };
+
+    const handleNameChange = useDebouncedCallback((value: string) => {
+        onUpdate(index, { ...column, name: value });
+    }, 300);
 
     const handleTypeChange = useCallback((value: SQLType) => {
         onUpdate(index, { ...column, sqlType: value });
@@ -28,10 +37,6 @@ export function ColumnEditorModal({ children, column, index, onUpdate, onClose }
     const handleBooleanChange = useCallback((field: keyof Pick<Column, 'isUnique' | 'isNullable' | 'isPK' | 'isFK'>) => (checked: boolean) => {
         onUpdate(index, { ...column, [field]: checked });
     }, [column, index, onUpdate]);
-
-    const handleRemoveTable = useCallback(() => {
-
-    }, [column, index, onUpdate])
 
     return (
         <Dialog onOpenChange={onClose}>
@@ -47,8 +52,8 @@ export function ColumnEditorModal({ children, column, index, onUpdate, onClose }
                         <Label htmlFor="column-name">Название колонки</Label>
                         <Input
                             id="column-name"
-                            value={column.name}
-                            onChange={handleNameChange}
+                            value={inputValue}
+                            onChange={handleInputChange}
                         />
                     </div>
                     <div>

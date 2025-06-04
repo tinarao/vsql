@@ -8,7 +8,6 @@ import {
     $currentProject,
     appendTable,
     updateTable,
-    loadFromLocalStorage,
 } from "@/lib/store/projects";
 import { createTable } from "@/lib/sql/fabrics/table";
 import { ProjectSidebar } from "@/components/ProjectSidebar";
@@ -24,10 +23,6 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     const [selectedTable, setSelectedTable] = useState<string | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, _, onEdgesChange] = useEdgesState([]);
-
-    useEffect(() => {
-        loadFromLocalStorage();
-    }, []);
 
     useEffect(() => {
         if (projectId) {

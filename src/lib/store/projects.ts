@@ -1,6 +1,7 @@
 import { createEvent, createStore } from "effector";
 import { Project, Table } from "../types/sql";
 import { $currentProjectId } from "./currentProjectId";
+import { persist } from "effector-storage/local"
 
 const LOCAL_STORAGE_KEY = "projects";
 
@@ -63,46 +64,9 @@ $projects
         );
     });
 
-export const loadFromLocalStorage = () => {
-    if (typeof window === 'undefined') return;
-
-    try {
-        const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (!raw) {
-            console.warn("No saved data found");
-            setProjects([]);
-            return;
-        }
-
-        console.time("Loading saved data");
-        const data = JSON.parse(raw) as Project[];
-
-        if (!Array.isArray(data)) {
-            throw new Error("Invalid data structure: expected array");
-        }
-
-        const validData = data.filter(project => {
-            if (!project || typeof project !== 'object') return false;
-            if (!project.uuid || typeof project.uuid !== 'string') return false;
-            if (!Array.isArray(project.tables)) return false;
-            return true;
-        });
-
-        setProjects(validData);
-        console.timeEnd("Loading saved data");
-    } catch (error) {
-        console.error("Error loading data:", error);
-        setProjects([]);
-    }
-};
-
-export const saveToLocalStorage = async () => {
-    if (typeof window === 'undefined') return;
-
-    try {
-        const data = $projects.getState();
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-    } catch (error) {
-        console.error("Error saving data:", error);
-    }
-};
+if (typeof window !== 'undefined') {
+    persist({
+        store: $projects,
+        key: LOCAL_STORAGE_KEY,
+    })
+}
