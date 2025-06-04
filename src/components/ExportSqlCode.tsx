@@ -1,0 +1,57 @@
+"use client";
+
+import { exportSqlMigrationCode } from "@/lib/sql/export";
+import { $currentProject, loadFromLocalStorage } from "@/lib/store/projects";
+import { useUnit } from "effector-react";
+import { CopyIcon, LoaderCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import Prism from 'prismjs';
+import 'prismjs/components/prism-sql';
+import 'prismjs/themes/prism-okaidia.css';
+import { Button } from "./ui/button";
+import { toast } from "sonner";
+
+export function ExportCode() {
+    const [isCopying, setIsCopying] = useState(false)
+    const currentProject = useUnit($currentProject);
+
+    useEffect(() => {
+        loadFromLocalStorage();
+    }, []);
+
+    const sqlMigrationCode = useMemo(() => {
+        return currentProject ? exportSqlMigrationCode(currentProject) : "";
+    }, [currentProject]);
+
+    useEffect(() => {
+        Prism.highlightAll()
+    }, [sqlMigrationCode])
+
+    async function handleCopy() {
+        setIsCopying(true)
+        try {
+            await navigator.clipboard.writeText(sqlMigrationCode)
+            toast.success("Скопировано!")
+        } catch {
+            toast.error("Не удалось скопировать код.")
+        } finally {
+            setIsCopying(false)
+        }
+    }
+
+    if (!currentProject) {
+        return <LoaderCircle className="animate-spin" />;
+    }
+
+    return (
+        <div>
+            <pre>
+                <code className="language-sql">{sqlMigrationCode}</code>
+            </pre>
+            <Button disabled={isCopying} onClick={handleCopy} variant="outline">
+                {isCopying ? <LoaderCircle className="animate-spin" /> : <CopyIcon />}
+                Скопировать
+            </Button>
+        </div>
+    );
+}

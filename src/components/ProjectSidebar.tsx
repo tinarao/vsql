@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { Code, PlusIcon } from "lucide-react";
 import { Table } from "@/lib/types/sql";
 import { TableDetails } from "@/components/TableDetails";
 import { ExportButton } from "./buttons/export-button";
+import { ExportSqlDialog } from "./ExportDialog";
 
 interface ProjectSidebarProps {
     onCreateTable: () => void;
@@ -14,11 +15,15 @@ export function ProjectSidebar({ onCreateTable, selectedTable, onTableUpdate }: 
     return (
         <aside className="h-full border-r">
             <div className="flex items-center justify-between p-4">
-                <Button size="lg" onClick={onCreateTable}>
+                <Button onClick={onCreateTable}>
                     <PlusIcon />
                     Создать таблицу
                 </Button>
-                <ExportButton />
+                <ExportSqlDialog>
+                    <Button variant="outline">
+                        <Code /> Экспорт кода
+                    </Button>
+                </ExportSqlDialog>
             </div>
             {selectedTable && (
                 <TableDetails
