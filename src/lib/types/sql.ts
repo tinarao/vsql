@@ -22,6 +22,7 @@ export type Table = {
     columns: Column[]
     createdAt: string
     lastUpdatedAt: string
+    position?: { x: number; y: number }
 }
 
 export type Column = {

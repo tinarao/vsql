@@ -39,5 +39,6 @@ export function createTable({ name, desc }: TableFabricArgs): Table {
         ],
         createdAt: new Date().toISOString(),
         lastUpdatedAt: new Date().toISOString(),
+        position: { x: 100, y: 100 }
     };
 }

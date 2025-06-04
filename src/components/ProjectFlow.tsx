@@ -12,8 +12,8 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { TableNode } from "@/components/TableNode";
 import { useUnit } from "effector-react";
-import { $currentProject, addRelation } from "@/lib/store/projects";
-import { useCallback, useEffect } from "react";
+import { $currentProject, addRelation, updateTable } from "@/lib/store/projects";
+import { useCallback } from "react";
 
 const nodeTypes = {
     table: TableNode,
@@ -34,6 +34,30 @@ export function ProjectFlow({
     onEdgesChange,
     onNodeClick,
 }: ProjectFlowProps) {
+    const currentProject = useUnit($currentProject);
+
+    const handleNodesChange = useCallback(
+        (changes: NodeChange[]) => {
+            onNodesChange(changes);
+            
+            changes.forEach((change) => {
+                if (change.type === 'position' && change.position) {
+                    const node = nodes.find((n) => n.id === change.id);
+                    if (node && currentProject) {
+                        const table = currentProject.tables.find((t) => t.uuid === node.id);
+                        if (table) {
+                            updateTable({
+                                ...table,
+                                position: change.position,
+                            });
+                        }
+                    }
+                }
+            });
+        },
+        [nodes, currentProject, onNodesChange]
+    );
+
     const onConnect = useCallback(
         (connection: Connection) => {
             if (!connection.source || !connection.target || !connection.sourceHandle || !connection.targetHandle) return;
@@ -53,7 +77,7 @@ export function ProjectFlow({
         <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
+            onNodesChange={handleNodesChange}
             onEdgesChange={onEdgesChange}
             onNodeClick={onNodeClick}
             onConnect={onConnect}

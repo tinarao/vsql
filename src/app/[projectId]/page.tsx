@@ -41,7 +41,7 @@ export default function ProjectPageClient() {
         const newNodes: Node[] = tables.map((table: Table, index: number) => ({
             id: table.uuid,
             type: "table",
-            position: { x: 100 + index * 200, y: 100 },
+            position: table.position || { x: 100 + index * 200, y: 100 },
             data: {
                 table,
                 isSelected: selectedTable === table.uuid,
