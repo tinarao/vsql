@@ -1,7 +1,6 @@
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -13,11 +12,9 @@ export function ExportSqlDialog({ children }: PropsWithChildren) {
     return (
         <Dialog>
             <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent>
+            <DialogContent className="min-w-[50rem]">
                 <DialogHeader>
                     <DialogTitle>SQL-Миграция</DialogTitle>
-                    <DialogDescription>
-                    </DialogDescription>
                 </DialogHeader>
                 <ExportCode />
             </DialogContent>

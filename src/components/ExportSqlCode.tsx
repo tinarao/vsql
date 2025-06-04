@@ -40,10 +40,12 @@ export function ExportCode() {
     }
 
     return (
-        <div>
-            <pre>
-                <code className="language-sql">{sqlMigrationCode}</code>
-            </pre>
+        <div className="w-full">
+            <div className="max-h-[60vh] overflow-auto">
+                <pre className="whitespace-pre-wrap break-words m-0 !w-full">
+                    <code className="language-sql block !w-full !max-w-full">{sqlMigrationCode}</code>
+                </pre>
+            </div>
             <Button disabled={isCopying} onClick={handleCopy} variant="outline">
                 {isCopying ? <LoaderCircle className="animate-spin" /> : <CopyIcon />}
                 Скопировать
