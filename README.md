@@ -10,4 +10,10 @@
 
 visual tool for describing your sql tables
 
+![Project page](screenshot.png?raw=true "Screenshot")
 
+## stack
+- [react flow](https://github.com/xyflow/xyflow)
+- [shadcn/ui](https://github.com/shadcn-ui/ui)
+- [effector](https://github.com/effector/effector)
+- [nanoid](https://github.com/ai/nanoid)
