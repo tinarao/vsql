@@ -15,6 +15,7 @@ export const getCurrentProjectIndex = createEvent();
 export const setProjects = createEvent<Project[]>();
 export const appendProject = createEvent<Project>();
 export const appendTable = createEvent<Table>();
+export const removeTable = createEvent<string>(); // string param is uuid
 export const updateTable = createEvent<Table>();
 export const setTables = createEvent<Table[]>();
 
@@ -31,6 +32,11 @@ $projects
                 : project,
         );
     })
+    .on(removeTable, (projects, idToRemove) =>
+        projects.map(p => p.uuid === $currentProjectId.getState() ? {
+            ...p,
+            tables: p.tables.filter(t => t.uuid !== idToRemove)
+        } : p))
     .on(updateTable, (projects, updatedTable) => {
         const currentProjectId = $currentProjectId.getState();
         if (!currentProjectId) return projects;
@@ -59,7 +65,7 @@ $projects
 
 export const loadFromLocalStorage = () => {
     if (typeof window === 'undefined') return;
-    
+
     try {
         const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (!raw) {
@@ -70,11 +76,11 @@ export const loadFromLocalStorage = () => {
 
         console.time("Loading saved data");
         const data = JSON.parse(raw) as Project[];
-        
+
         if (!Array.isArray(data)) {
             throw new Error("Invalid data structure: expected array");
         }
-        
+
         const validData = data.filter(project => {
             if (!project || typeof project !== 'object') return false;
             if (!project.uuid || typeof project.uuid !== 'string') return false;
@@ -92,7 +98,7 @@ export const loadFromLocalStorage = () => {
 
 export const saveToLocalStorage = async () => {
     if (typeof window === 'undefined') return;
-    
+
     try {
         const data = $projects.getState();
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));

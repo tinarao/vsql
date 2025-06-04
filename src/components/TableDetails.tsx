@@ -11,7 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from "./ui/table";
-import { PenSquareIcon, PlusIcon } from 'lucide-react';
+import { PenSquareIcon, PlusIcon, Trash } from 'lucide-react';
 import { ColumnEditorModal } from './ColumnEditorModal';
 import { createColumn } from '@/lib/sql/fabrics/table';
 
@@ -40,6 +40,14 @@ export const TableDetails = memo(function TableDetails({ table, onUpdate }: Tabl
         });
     }, [table, onUpdate]);
 
+    const handleRemoveColumn = useCallback((uuidToDelete: string) => {
+        const newColumns = table.columns.filter(c => c.uuid !== uuidToDelete)
+        onUpdate({
+            ...table,
+            columns: newColumns
+        })
+    }, [table, onUpdate])
+
     if (!table) {
         return (
             <div className="p-4 text-muted-foreground">
@@ -66,7 +74,7 @@ export const TableDetails = memo(function TableDetails({ table, onUpdate }: Tabl
                         <PlusIcon />
                     </Button>
                 </div>
-                
+
                 <UITable>
                     <TableHeader>
                         <TableRow>
@@ -77,24 +85,27 @@ export const TableDetails = memo(function TableDetails({ table, onUpdate }: Tabl
                     </TableHeader>
                     <TableBody>
                         {table.columns.map((column, index) => (
-                            <TableRow 
+                            <TableRow
                                 key={column.uuid}
                                 className="cursor-pointer hover:bg-muted/50"
                             >
                                 <TableCell>{column.name}</TableCell>
                                 <TableCell className={column.isPK ? "text-primary" : ""}>{column.sqlType}</TableCell>
-                                <TableCell>
+                                <TableCell className="space-x-2">
                                     <ColumnEditorModal column={column} index={index} onUpdate={handleColumnUpdate}>
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                        }}
-                                    >
-                                        <PenSquareIcon  />
-                                    </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                            }}
+                                        >
+                                            <PenSquareIcon />
+                                        </Button>
                                     </ColumnEditorModal>
+                                    <Button onClick={() => handleRemoveColumn(column.uuid)} size="icon" variant="ghost" className="hover:bg-red-500 hover:text-white">
+                                        <Trash />
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}

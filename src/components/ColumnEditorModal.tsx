@@ -1,15 +1,15 @@
 "use client"
 
 import { SQLType, Column, SQL_TYPES, Table } from "@/lib/types/sql";
-import React, { useCallback } from "react";
-import { Dialog,  DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import React, { ReactNode, useCallback } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Switch } from "./ui/switch";
 
 interface ColumnEditorProps {
-    children: React.ReactNode
+    children: ReactNode
     column: Table['columns'][0];
     index: number;
     onUpdate: (index: number, column: Table['columns'][0]) => void;
@@ -17,7 +17,6 @@ interface ColumnEditorProps {
 }
 
 export function ColumnEditorModal({ children, column, index, onUpdate, onClose }: ColumnEditorProps) {
-
     const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         onUpdate(index, { ...column, name: e.target.value });
     }, [column, index, onUpdate]);
@@ -30,10 +29,14 @@ export function ColumnEditorModal({ children, column, index, onUpdate, onClose }
         onUpdate(index, { ...column, [field]: checked });
     }, [column, index, onUpdate]);
 
+    const handleRemoveTable = useCallback(() => {
+
+    }, [column, index, onUpdate])
+
     return (
         <Dialog onOpenChange={onClose}>
             <DialogTrigger asChild>
-                { children }
+                {children}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
